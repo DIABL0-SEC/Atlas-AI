@@ -407,8 +407,28 @@ class AtlasScannerFindingsTab:
                 # Build issue text
                 issue_text = self._build_issue_details(current_issue)
                 
+                # Validate issue_text
+                if not issue_text:
+                    raise Exception("Failed to build issue details - empty issue text")
+                
+                # Convert unicode to str for Python 2/Jython compatibility
+                if isinstance(issue_text, unicode):
+                    issue_text = issue_text.encode('utf-8')
+                
                 # Use the scanner finding analysis prompt
-                prompt = AtlasPrompts.SCANNER_FINDING_ANALYSIS.format(issue_text=issue_text)
+                try:
+                    # Debug: Let's see what we're working with
+                    self.extension.get_stderr().println("[Atlas AI Debug] SCANNER_FINDING_ANALYSIS type: " + str(type(AtlasPrompts.SCANNER_FINDING_ANALYSIS)))
+                    self.extension.get_stderr().println("[Atlas AI Debug] issue_text length: " + str(len(issue_text)))
+                    self.extension.get_stderr().println("[Atlas AI Debug] First 100 chars of issue_text: " + repr(issue_text[:100]))
+                    
+                    # Try direct string concatenation as a workaround
+                    prompt = AtlasPrompts.SCANNER_FINDING_ANALYSIS.replace("{issue_text}", issue_text)
+                    
+                except Exception as format_error:
+                    self.extension.get_stderr().println("[Atlas AI Debug] Format error details: " + repr(format_error))
+                    self.extension.get_stderr().println("[Atlas AI Debug] Format error type: " + str(type(format_error)))
+                    raise Exception("Failed to format prompt: " + repr(format_error))
                 
                 # Get AI response
                 adapter = self.extension.get_current_adapter()
@@ -425,8 +445,12 @@ class AtlasScannerFindingsTab:
                 SwingUtilities.invokeLater(lambda: self._update_finding_status(current_issue, "Analyzed"))
                 
             except Exception as e:
-                error_msg = "Analysis error: " + str(e)
+                import traceback
+                error_text = str(e) if str(e).strip() else repr(e)
+                error_msg = "Analysis error: " + error_text
+                full_error = traceback.format_exc()
                 self.extension.get_stderr().println("[Atlas AI] " + error_msg)
+                self.extension.get_stderr().println("[Atlas AI] Full traceback:\n" + full_error)
                 SwingUtilities.invokeLater(lambda: self._show_error(error_msg))
                 SwingUtilities.invokeLater(lambda: self._update_finding_status(current_issue, "Error"))
             finally:
@@ -465,8 +489,28 @@ class AtlasScannerFindingsTab:
                 # Build issue text
                 issue_text = self._build_issue_details(current_issue)
                 
+                # Validate issue_text
+                if not issue_text:
+                    raise Exception("Failed to build issue details - empty issue text")
+                
+                # Convert unicode to str for Python 2/Jython compatibility
+                if isinstance(issue_text, unicode):
+                    issue_text = issue_text.encode('utf-8')
+                
                 # Use the exploitation vectors prompt
-                prompt = AtlasPrompts.SCANNER_EXPLOITATION_VECTORS.format(issue_text=issue_text)
+                try:
+                    # Debug: Let's see what we're working with
+                    self.extension.get_stderr().println("[Atlas AI Debug] SCANNER_EXPLOITATION_VECTORS type: " + str(type(AtlasPrompts.SCANNER_EXPLOITATION_VECTORS)))
+                    self.extension.get_stderr().println("[Atlas AI Debug] issue_text length: " + str(len(issue_text)))
+                    self.extension.get_stderr().println("[Atlas AI Debug] First 100 chars of issue_text: " + repr(issue_text[:100]))
+                    
+                    # Try direct string concatenation as a workaround
+                    prompt = AtlasPrompts.SCANNER_EXPLOITATION_VECTORS.replace("{issue_text}", issue_text)
+                    
+                except Exception as format_error:
+                    self.extension.get_stderr().println("[Atlas AI Debug] Format error details: " + repr(format_error))
+                    self.extension.get_stderr().println("[Atlas AI Debug] Format error type: " + str(type(format_error)))
+                    raise Exception("Failed to format prompt: " + repr(format_error))
                 
                 # Get AI response
                 adapter = self.extension.get_current_adapter()
@@ -483,8 +527,12 @@ class AtlasScannerFindingsTab:
                 SwingUtilities.invokeLater(lambda: self._update_finding_status(current_issue, "Exploited"))
                 
             except Exception as e:
-                error_msg = "Exploitation error: " + str(e)
+                import traceback
+                error_text = str(e) if str(e).strip() else repr(e)
+                error_msg = "Exploitation error: " + error_text
+                full_error = traceback.format_exc()
                 self.extension.get_stderr().println("[Atlas AI] " + error_msg)
+                self.extension.get_stderr().println("[Atlas AI] Full traceback:\n" + full_error)
                 SwingUtilities.invokeLater(lambda: self._show_error(error_msg))
                 SwingUtilities.invokeLater(lambda: self._update_finding_status(current_issue, "Error"))
             finally:

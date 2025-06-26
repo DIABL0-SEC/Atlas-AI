@@ -344,8 +344,12 @@ class AtlasAIExtension(IBurpExtender, ITab, IContextMenuFactory, IMessageEditorT
             return result
             
         except Exception as e:
-            self._stderr.println("[Atlas AI] Analysis error: " + str(e))
-            return "Error during analysis: " + str(e)
+            import traceback
+            error_msg = str(e) if str(e).strip() else repr(e)
+            full_error = traceback.format_exc()
+            self._stderr.println("[Atlas AI] Analysis error: " + error_msg)
+            self._stderr.println("[Atlas AI] Full traceback:\n" + full_error)
+            return "Error during analysis: " + error_msg
     
     def _build_http_analysis(self, request_bytes, response_bytes, service):
         """Build HTTP analysis text."""
