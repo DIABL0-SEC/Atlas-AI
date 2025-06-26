@@ -1,0 +1,121 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Burp Suite specific
+*.burp
+burp_tmp/
+BurpSuitePro.jar
+
+# API Keys and Secrets (NEVER commit these!)
+config.json
+secrets.json
+settings.json
+*.key
+*.pem
+api_keys.txt
+credentials.txt
+
+# Test files
+test_*.py
+tests/
+*.test
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.cache
+*.lock
+
+# Log files
+*.log
+logs/
+
+# Claude AI generated directories
+.claude/
+
+# Documentation build
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Jython specific
+*.jar
+!atlas_ai.jar  # Allow the extension jar if you distribute it
+
+# CLAUDE.md is tracked
+!CLAUDE.md
