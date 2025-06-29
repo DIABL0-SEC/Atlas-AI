@@ -13,6 +13,8 @@ class AtlasConfig:
             "api_key": "",
             "local_url": "http://localhost:1234/v1/chat/completions",
             "local_api_key": "",
+            "local_custom_header": "",  # Custom header name for local LLM
+            "local_header_format": "Bearer",  # Header format: Bearer, Basic, or None
             "model": "gpt-3.5-turbo",
             "temperature": 0.3,
             "max_tokens": 3000,

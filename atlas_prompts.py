@@ -13,7 +13,7 @@ class AtlasPrompts:
 
 CRITICAL OUTPUT REQUIREMENTS:
 PLAIN TEXT ONLY - do not use HTML, Markdown, JSON, XML, or any other formatting.
-No special formatting characters (no *, -, #, <, >, [ ], { }, etc.).
+No special formatting characters (no *, -, #, <, >, [ ], {{ }}, etc.).
 No code blocks, no tables, and no lists or bullet points.
 No indentation solely for formatting.
 Use simple line breaks and minimal punctuation (like colons) to structure your response.
@@ -66,7 +66,7 @@ Provide 3 to 5 concrete payloads for the most promising attack vectors identifie
 
 CRITICAL OUTPUT REQUIREMENTS:
 PLAIN TEXT ONLY - do not use HTML, Markdown, JSON, XML, or any other formatting.
-No special formatting characters (no *, -, #, <, >, [ ], { }, etc.).
+No special formatting characters (no *, -, #, <, >, [ ], {{ }}, etc.).
 No code blocks, no tables, and no lists or bullet points.
 No indentation solely for formatting.
 Use simple line breaks and minimal punctuation for structure.
@@ -120,17 +120,27 @@ Specific methods to exploit the identified issues (e.g., crafting malicious inpu
 BURP SUITE INTEGRATION:
 Suggested Burp Suite payloads or tools (e.g., Intruder, Repeater, or Scanner configurations) to verify and exploit these findings"""
     
-    PAYLOAD_GENERATION = """Generate a set of advanced attack payloads for penetration testing. Cover each of the categories below. If the target context is known (e.g., specific database, OS, or framework), tailor the payloads accordingly. Provide a variety of techniques and bypasses in each category.
+    PAYLOAD_GENERATION = """Analyze the following HTTP request and response to generate context-aware attack payloads for penetration testing. Base your payloads on the specific parameters, endpoints, headers, and response patterns observed. Tailor the attack vectors to exploit potential vulnerabilities in this specific context.
+
+{http_context}
 
 CRITICAL OUTPUT REQUIREMENTS:
 PLAIN TEXT ONLY - do not use any HTML, Markdown, JSON, XML, or other formatted output.
-No special formatting characters (no *, -, #, <, >, [ ], { }, etc.).
+No special formatting characters (no *, -, #, <, >, [ ], {{ }}, etc.).
 No code block or table formatting; no bullet or numbered lists.
 Use simple line breaks to separate items and categories.
 Ensure the output is readable as plain text in any viewer.
 These rules must be strictly followed.
 
-PAYLOAD CATEGORIES (provide 5 to 7 payload examples per relevant category):
+Based on the above HTTP context, generate targeted attack payloads that:
+1. Target specific parameters found in the request
+2. Consider the technology stack revealed by headers and responses
+3. Exploit patterns or vulnerabilities suggested by the response structure
+4. Account for any input validation or filtering observed
+
+For each applicable category below, provide context-specific payloads tailored to the actual parameters and endpoints shown above. Skip categories that are not relevant to this specific request/response.
+
+PAYLOAD CATEGORIES (provide 5 to 7 context-specific examples per relevant category):
 
 SQL INJECTION:
 Boolean-based blind SQLi  
@@ -168,7 +178,7 @@ Access cloud instance metadata endpoints
 Protocol smuggling using alternative URI schemes (gopher, file, etc.)
 
 NoSQL INJECTION:
-MongoDB always-true query payloads (e.g., `{$ne:null}`)  
+MongoDB always-true query payloads (e.g., `{{$ne:null}}`)  
 CouchDB map/reduce injection  
 Authentication bypass through NoSQL query manipulation
 
@@ -183,10 +193,12 @@ Python `pickle` RCE payload
 .NET BinaryFormatter payload for remote code execution
 
 Format each payload example as:
-PARAMETER: [target_parameter_or_context]  
-PAYLOAD: [the exact malicious input]  
-PURPOSE: [what this payload tests or the effect it aims for]  
-DETECTION: [how to identify if the payload was successful]"""
+PARAMETER: [specific parameter name from the request]  
+PAYLOAD: [the exact malicious input tailored to this context]  
+PURPOSE: [what this payload tests based on the observed behavior]  
+DETECTION: [how to identify success given the response patterns]
+
+Focus on the actual parameters, endpoints, and patterns from the HTTP data above. Do not generate generic payloads - make them specific to this target."""
     
     SELECTION_EXPLANATION = """Analyze the following selected code or content from a security perspective (geared towards bug bounty hunting). Focus your analysis on details present in the snippet without making unfounded assumptions.
 

@@ -129,13 +129,14 @@ class LocalLLMAdapter(BaseAdapter):
     - Custom endpoint configuration for internal networks
     """
     
-    def __init__(self, endpoint_url, model="local-model", temperature=0.3, max_tokens=3000, timeout=60, api_key=None):
+    def __init__(self, endpoint_url, model="local-model", temperature=0.3, max_tokens=3000, timeout=60, api_key=None, config=None):
         super(LocalLLMAdapter, self).__init__(timeout)
         self.endpoint_url = endpoint_url
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.api_key = api_key
+        self.config = config
         
         # Privacy validation
         self._validate_privacy_settings(endpoint_url)
@@ -246,16 +247,29 @@ class LocalLLMAdapter(BaseAdapter):
             
             # Add API key if provided (supports various authentication methods)
             if self.api_key:
-                # Try to detect the type of API key header needed
-                if "bedrock" in self.endpoint_url.lower() or "aws" in self.endpoint_url.lower():
-                    # AWS services typically use x-api-key header
-                    headers.append("x-api-key: " + self.api_key)
-                elif "anthropic" in self.endpoint_url.lower() or "claude" in self.endpoint_url.lower():
-                    # Anthropic uses x-api-key header
-                    headers.append("x-api-key: " + self.api_key)
+                # Check if custom header is configured
+                custom_header = self.config.get("local_custom_header", "") if self.config else ""
+                header_format = self.config.get("local_header_format", "Bearer") if self.config else "Bearer"
+                
+                if custom_header:
+                    # Use custom header configuration
+                    if header_format == "Bearer":
+                        headers.append(custom_header + ": Bearer " + self.api_key)
+                    elif header_format == "Basic":
+                        headers.append(custom_header + ": Basic " + self.api_key)
+                    else:  # None format
+                        headers.append(custom_header + ": " + self.api_key)
                 else:
-                    # Default to Bearer token (OpenAI-compatible)
-                    headers.append("Authorization: Bearer " + self.api_key)
+                    # Fall back to auto-detection
+                    if "bedrock" in self.endpoint_url.lower() or "aws" in self.endpoint_url.lower():
+                        # AWS services typically use x-api-key header
+                        headers.append("x-api-key: " + self.api_key)
+                    elif "anthropic" in self.endpoint_url.lower() or "claude" in self.endpoint_url.lower():
+                        # Anthropic uses x-api-key header
+                        headers.append("x-api-key: " + self.api_key)
+                    else:
+                        # Default to Bearer token (OpenAI-compatible)
+                        headers.append("Authorization: Bearer " + self.api_key)
             
             # Build full request
             request = "\r\n".join(headers) + "\r\n\r\n" + request_body

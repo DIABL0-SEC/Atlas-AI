@@ -121,6 +121,38 @@ class AtlasUIBuilder:
         
         row += 1
         
+        # Custom Header Name (for Local LLM)
+        gbc.gridx = 0
+        gbc.gridy = row
+        gbc.fill = GridBagConstraints.NONE
+        self.local_custom_header_label = JLabel("Custom Header Name:")
+        panel.add(self.local_custom_header_label, gbc)
+        
+        gbc.gridx = 1
+        gbc.fill = GridBagConstraints.HORIZONTAL
+        self.local_custom_header_field = JTextField(config_data.get("local_custom_header", ""))
+        self.local_custom_header_field.setToolTipText("e.g., x-api-key, Authorization, api-key")
+        panel.add(self.local_custom_header_field, gbc)
+        
+        row += 1
+        
+        # Header Format (for Local LLM)
+        gbc.gridx = 0
+        gbc.gridy = row
+        gbc.fill = GridBagConstraints.NONE
+        self.local_header_format_label = JLabel("Header Format:")
+        panel.add(self.local_header_format_label, gbc)
+        
+        gbc.gridx = 1
+        gbc.fill = GridBagConstraints.HORIZONTAL
+        self.local_header_format_combo = JComboBox(["Bearer", "Basic", "None"])
+        selected_format = config_data.get("local_header_format", "Bearer")
+        self.local_header_format_combo.setSelectedItem(selected_format)
+        self.local_header_format_combo.setToolTipText("Bearer: 'Bearer {key}', Basic: 'Basic {key}', None: '{key}'")
+        panel.add(self.local_header_format_combo, gbc)
+        
+        row += 1
+        
         # Model
         gbc.gridx = 0
         gbc.gridy = row
@@ -354,6 +386,10 @@ Compatible with Burp Suite 2025.x"""
         self.local_url_field.setVisible(not is_openai)
         self.local_api_key_label.setVisible(not is_openai)
         self.local_api_key_field.setVisible(not is_openai)
+        self.local_custom_header_label.setVisible(not is_openai)
+        self.local_custom_header_field.setVisible(not is_openai)
+        self.local_header_format_label.setVisible(not is_openai)
+        self.local_header_format_combo.setVisible(not is_openai)
         
         if is_openai:
             self.model_field.setText("gpt-3.5-turbo")
@@ -378,11 +414,16 @@ Compatible with Burp Suite 2025.x"""
             except:
                 timeout = 60
             
+            local_custom_header = self.local_custom_header_field.getText().strip()
+            local_header_format = self.local_header_format_combo.getSelectedItem()
+            
             settings = {
                 "backend": backend,
                 "api_key": api_key,
                 "local_url": local_url,
                 "local_api_key": local_api_key,
+                "local_custom_header": local_custom_header,
+                "local_header_format": local_header_format,
                 "model": model,
                 "timeout": timeout
             }

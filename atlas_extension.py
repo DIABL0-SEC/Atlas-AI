@@ -257,7 +257,8 @@ class AtlasAIExtension(IBurpExtender, ITab, IContextMenuFactory, IMessageEditorT
                 config_data["local_url"],
                 config_data.get("model", "local-model"),
                 timeout=config_data.get("timeout", 60),
-                api_key=config_data.get("local_api_key", None)
+                api_key=config_data.get("local_api_key", None),
+                config=config_data
             )
             # Set Burp callbacks for HTTP requests
             self._current_adapter.set_burp_callbacks(self._callbacks)
@@ -310,10 +311,11 @@ class AtlasAIExtension(IBurpExtender, ITab, IContextMenuFactory, IMessageEditorT
             cache_content = str(request_bytes) + str(response_bytes) + analysis_type
             cache_key = hashlib.sha256(cache_content.encode('utf-8')).hexdigest()
             
-            # Check cache
-            with self._cache_lock:
-                if cache_key in self._response_cache:
-                    return self._response_cache[cache_key]
+            # Check cache (skip cache for payloads to allow regeneration)
+            if analysis_type != "payloads":
+                with self._cache_lock:
+                    if cache_key in self._response_cache:
+                        return self._response_cache[cache_key]
             
             # Build analysis based on type
             if analysis_type == "request":
@@ -327,19 +329,25 @@ class AtlasAIExtension(IBurpExtender, ITab, IContextMenuFactory, IMessageEditorT
             prompt = self._get_analysis_prompt(analysis_type)
             
             # Get AI response
-            ai_response = self._current_adapter.send_message(prompt + "\n\n" + analysis)
+            if analysis_type == "payloads" and "{http_context}" in prompt:
+                # For payload generation, format the prompt with the HTTP context
+                formatted_prompt = prompt.format(http_context=analysis)
+                ai_response = self._current_adapter.send_message(formatted_prompt)
+            else:
+                ai_response = self._current_adapter.send_message(prompt + "\n\n" + analysis)
             
             # Format result
             result = self._format_analysis_result(ai_response, service, analysis_type)
             
-            # Cache result with size limit
-            with self._cache_lock:
-                self._response_cache[cache_key] = result
-                # Remove oldest entries if cache is too large
-                if len(self._response_cache) > self._max_cache_size:
-                    # Remove the first (oldest) item
-                    oldest_key = next(iter(self._response_cache))
-                    del self._response_cache[oldest_key]
+            # Cache result with size limit (skip caching for payloads)
+            if analysis_type != "payloads":
+                with self._cache_lock:
+                    self._response_cache[cache_key] = result
+                    # Remove oldest entries if cache is too large
+                    if len(self._response_cache) > self._max_cache_size:
+                        # Remove the first (oldest) item
+                        oldest_key = next(iter(self._response_cache))
+                        del self._response_cache[oldest_key]
             
             return result
             
